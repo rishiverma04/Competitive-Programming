@@ -1,77 +1,61 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
 
-class DisjointSet{
-   vector<int>rank,parent,size;
-   public:
-   DisjointSet(int n){
-    rank.resize(n+1,0);
-    parent.resize(n+1);
-    size.resize(n+1);
-    for(int i=0;i<=n;i++){
-parent[i]=i;
-size[i]=1;
-    }
-   }
-   int findUPar(int node){
-    if(node==parent[node])
-    return node;
-    return parent[node]=findUPar(parent[node]); 
-   }
-   void unionbyRank(int u,int v){
-    int ultimate_pu=findUPar(u);
-    int ultimate_pv=findUPar(v);
-    if(ultimate_pu==ultimate_pv) // same component
-    return ; 
-    if(rank[ultimate_pu]<rank[ultimate_pv]){ // if not same component and u<v
-    parent[ultimate_pu]=ultimate_pv; // attach smaller to largest u->v
-    }
-    else if(rank[ultimate_pv]<rank[ultimate_pu]){
-        parent[ultimate_pv]=ultimate_pu;
-    }
-    else{
-        parent[ultimate_pv]=ultimate_pu; // if same
-        rank[ultimate_pu]++; // rank will increase
+class DSU {
+public:
+    vector<int> parent, sz;
 
+    DSU(int n) {
+        parent.resize(n + 1);
+        sz.resize(n + 1);
 
+        for (int i = 1; i <= n; i++) {
+            parent[i] = i;
+            sz[i] = 1;
+        }
     }
-   }
-   void unionbySize(int u,int v){
-    int ultimate_pu=findUPar(u);
-    int ultimate_pv=findUPar(v);
-    if(ultimate_pu==ultimate_pv) // same component
-    return ; 
-     if(size[ultimate_pu]<size[ultimate_pv]){ //u<v
-        parent[ultimate_pu]=ultimate_pv; 
-        size[ultimate_pv]+=size[ultimate_pu]; //attach to v
-     }
-     else{
-parent[ultimate_pv]=ultimate_pu;  //u>v
-        size[ultimate_pu]+=size[ultimate_pv];
-     }
-   }
+
+    int find(int x) {
+        if (parent[x] == x) 
+            return x;// if node points to itself return the root
+        return parent[x] = find(parent[x]); // Path Compression
+    }
+
+    void unite(int a, int b) {
+        a = find(a);
+        b = find(b);
+
+        if (a != b) {
+            if (sz[a] < sz[b])  // connect smaller tree with bigger tree
+                swap(a, b);
+
+            parent[b] = a;  // make parent a of b
+            sz[a] += sz[b]; // update the size of a
+        }
+    }
+
+    bool same(int a, int b) {
+        return find(a) == find(b); // check whether node belong to same root
+    }
+
+    int size(int x) {
+        return sz[find(x)]; // returns size of component
+    }
 };
-int main()
-{
-    DisjointSet ds(7);
-    ds.unionbySize(1,2);
-     ds.unionbySize(2,3);
-      ds.unionbySize(4,5);
-       ds.unionbySize(6,7);
-       ds.unionbySize(5,6);
-       // we check if 3 &7 belong to same component or not
-       if(ds.findUPar(3)==ds.findUPar(7)){
-        cout << "Same"<<endl;
-       }
-       else{
-        cout << "Not Same"<<endl; // here it is not same
-       }
-        ds.unionbySize(3,7);
-        if(ds.findUPar(3)==ds.findUPar(7)){
-        cout << "Same"<<endl;
-       }
-       else{
-        cout << "Not Same"<<endl; // here it is  same
-       }
-       return 0;
-}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+
+    DSU dsu(n);
+
+    while (m--) {
+        int u, v;
+        cin >> u >> v;
+        dsu.unite(u, v);
+    }
+
+    for (int i = 1; i <= n; i++) {
+        cout << "Node " << i << " -> Parent: " << dsu.find(i) << "\n";
+    }
+} same se samjhao
